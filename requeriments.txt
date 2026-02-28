@@ -1,5 +1,6 @@
 pygame
-play3d
+PyOpenGL
+PyOpenGL_accelerate
 numpy
 pyyaml
 noise
