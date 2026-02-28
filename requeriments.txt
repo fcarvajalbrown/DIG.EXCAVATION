@@ -1,0 +1,5 @@
+pygame
+play3d
+numpy
+pyyaml
+noise
