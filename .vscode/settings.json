@@ -1,8 +1,0 @@
-{
-    "Lua.workspace.library": [
-        "${3rd}/love2d/library"
-    ],
-    "Lua.runtime.version": "LuaJIT",
-    "Lua.completion.showWord": "Disable",
-    "love-launcher.path": "C:\\Program Files\\LOVE\\love.exe"
-}
