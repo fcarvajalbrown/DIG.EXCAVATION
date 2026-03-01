@@ -1,6 +1,0 @@
-pygame
-PyOpenGL
-PyOpenGL_accelerate
-numpy
-pyyaml
-noise
