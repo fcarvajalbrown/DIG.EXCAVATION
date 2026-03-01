@@ -116,9 +116,9 @@ class SiteProfile:
 PROFILE_CORPORATE = SiteProfile(
     name          = "Abandoned Corporate Server",
     theme         = "corporate",
-    max_depth     = 4,
-    branch_factor = 3.0,
-    files_per_dir = 4.0,
+    max_depth     = 2,
+    branch_factor = 2.0,
+    files_per_dir = 3.0,
     debris_ratio  = 0.25,
     artifact_density = 0.15,
     base_corruption  = 0.08,
@@ -374,13 +374,16 @@ class SiteGenerator:
             0.99,
             profile.base_corruption + rng.uniform(-0.03, 0.03),
         ))
-        return Node(
+        node = Node(
             name       = name,
             node_type  = node_type,
             parent_id  = parent_id,
             corruption = corruption,
             metadata   = {"theme": profile.theme, "site": profile.name},
         )
+        if node_type is NodeType.DIRECTORY:
+            node.visibility = NodeVisibility.DETECTED
+        return node
 
     @staticmethod
     def _lookup_child_name(

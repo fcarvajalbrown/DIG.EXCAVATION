@@ -179,7 +179,6 @@ class Terminal:
             completed        = self._input_line.strip()
             self._echo_input(completed)
             self._input_line = ""
-            self._scroll     = 0   # snap to bottom on submit
             return completed if completed else None
 
         elif event.key == pygame.K_BACKSPACE:
@@ -243,13 +242,18 @@ class Terminal:
         surf.fill(_BLACK)
 
         visible = self._visible_lines()
-        # Slice of the buffer to display (newest at bottom)
         buf_list  = list(self._buffer)
-        end_idx   = len(buf_list) - self._scroll
-        start_idx = max(0, end_idx - visible)
+        total     = len(buf_list)
+
+        # _scroll=0 means show bottom (latest). PageUp increases _scroll.
+        # Clamp scroll so it never exceeds what's available.
+        self._scroll = min(self._scroll, max(0, total - visible + 2))
+
+        end_idx   = total - self._scroll
+        start_idx = max(0, end_idx - visible + 2)  # +2 reserves input area
         visible_lines = buf_list[start_idx:end_idx]
 
-        # Reserve bottom two rows: one blank + one input line
+        # Reserve bottom two rows: separator + input line
         text_rows = visible - 2
 
         # Draw output lines
@@ -357,18 +361,15 @@ class Terminal:
     # ------------------------------------------------------------------
 
     def _print_boot_sequence(self) -> None:
-        """Print the startup banner to the output buffer."""
+        """Print simple connection messages on game start."""
         lines = [
-            "╔══════════════════════════════════════════════╗",
-            "║        D I G . E X C A V A T I O N          ║",
-            "║     Virtual Artifacts Council — v0.1.0       ║",
-            "╚══════════════════════════════════════════════╝",
+            "DIG.EXCAVATION — Virtual Artifacts Council v0.1.0",
             "",
             "  Connecting to dig site...",
             "  Filesystem integrity check... OK",
             "  Security sweep... DAEMONS DETECTED",
             "",
-            "  Type HELP for available commands.",
+            "  Type LS to see what is here.",
             "",
         ]
         for line in lines:

@@ -271,19 +271,35 @@ class CommandHandler:
     # ------------------------------------------------------------------
 
     def _cmd_scan(self, args: list[str]) -> CommandResult:
-        """Handle SCAN <target>.
+        """Handle SCAN <target> or SCAN * to scan everything in the current directory.
 
         Parameters
         ----------
         args:
-            Command arguments; first element is the target name.
+            Command arguments; first element is the target name or *.
         """
         if not args:
-            return CommandResult.fail("SCAN", "Usage: SCAN <target>")
+            return CommandResult.fail("SCAN", "Usage: SCAN <target> | SCAN *")
 
         target_name = args[0]
-        node        = self._fs.scan(target_name)
 
+        # Wildcard — scan every node in the current directory
+        if target_name == "*":
+            children = list(self._fs.list_directory(include_hidden=True))
+            if not children:
+                return CommandResult.fail("SCAN", "Nothing to scan here.")
+            lines = ["SCANNING ALL..."]
+            for child in children:
+                try:
+                    node = self._fs.scan(child.name)
+                    tag  = "[ART]" if node.has_artifact else ""
+                    lines.append(f"  {node.node_type.name[:3]}  {node.name:<20} {node.visibility.name}  {node.corruption:.0%}  {tag}")
+                except Exception:
+                    pass
+            return CommandResult.ok("SCAN", *lines)
+
+        # Single target
+        node  = self._fs.scan(target_name)
         lines = [f"SCANNING {target_name}..."]
         lines.append(f"  Type:       {node.node_type.name}")
         lines.append(f"  Visibility: {node.visibility.name}")
@@ -477,6 +493,7 @@ class CommandHandler:
         lines = [
             "AVAILABLE COMMANDS",
             "  SCAN   <target>       Reveal a node (costs POWER)",
+            "  SCAN   *              Reveal ALL nodes here (costs POWER)",
             "  CARVE  <target>       Convert DEBRIS to FILE (costs POWER + ENERGY)",
             "  RECON  <target>       Reconstruct artifact (costs POWER + MEMORY)",
             "  SELL   <artifact_id>  Sell a collected artifact",
